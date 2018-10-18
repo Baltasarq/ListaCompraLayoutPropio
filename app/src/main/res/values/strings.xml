@@ -3,4 +3,6 @@
     <string name="nuevo">Nuevo</string>
     <string name="cancelar">Cancelar</string>
     <string name="guardar">Guardar</string>
+    <string name="salir">Salir</string>
+    <string name="eliminar">Eliminar</string>
 </resources>

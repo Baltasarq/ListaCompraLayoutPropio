@@ -3,6 +3,11 @@ package com.devbaltasarq.listadelacompra.ui;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,11 +31,66 @@ public class MainActivity extends AppCompatActivity {
 
         this.items = new ArrayList<>();
         btNuevo.setOnClickListener( (v) -> creaNuevoElemento() );
-        lvItems.setOnItemLongClickListener( (lv, iv, pos, id) -> {
-            this.eliminaItem( pos );
-            return true;
-        });
+        this.registerForContextMenu( lvItems );
         this.creaLista();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        super.onCreateOptionsMenu(menu);
+
+        this.getMenuInflater().inflate( R.menu.main_menu, menu );
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        boolean toret = false;
+        super.onOptionsItemSelected(item);
+
+        switch( item.getItemId() ) {
+            case R.id.opSalir:
+                this.finish();
+                toret = true;
+                break;
+            case R.id.opNuevo:
+                this.creaNuevoElemento();
+                toret = true;
+                break;
+        }
+
+        return toret;
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo)
+    {
+        super.onCreateContextMenu( menu, v, menuInfo );
+
+        if ( v.getId() == R.id.lvItems ) {
+            this.getMenuInflater().inflate( R.menu.context_menu, menu );
+        }
+
+        return;
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item)
+    {
+        boolean toret = false;
+        super.onContextItemSelected( item );
+
+        if ( item.getItemId() == R.id.opElimina ) {
+            toret = true;
+            int pos = ( (AdapterView.AdapterContextMenuInfo)
+                    item.getMenuInfo() ).position;
+            this.eliminaItem( pos );
+        }
+
+        return toret;
     }
 
     private void creaLista()
