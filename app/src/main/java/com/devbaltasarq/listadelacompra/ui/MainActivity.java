@@ -1,8 +1,10 @@
 package com.devbaltasarq.listadelacompra.ui;
 
+import android.content.SharedPreferences;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,8 +20,11 @@ import com.devbaltasarq.listadelacompra.R;
 import com.devbaltasarq.listadelacompra.core.Item;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
+    private static String LogTag = MainActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +38,59 @@ public class MainActivity extends AppCompatActivity {
         btNuevo.setOnClickListener( (v) -> creaNuevoElemento() );
         this.registerForContextMenu( lvItems );
         this.creaLista();
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+
+        // Guardar la lista de la compra
+        Log.d( LogTag, "Guardando la lista de la compra..." );
+
+        final SharedPreferences prefs = this.getPreferences( MODE_PRIVATE );
+        final SharedPreferences.Editor editor = prefs.edit();
+        Set<String> compras = new HashSet<>();
+
+        for(Item item: this.items) {
+            final String LINEA_ITEM = item.getNombre() + "," + item.getSupermercado();
+
+            Log.d( LogTag, "Guardado: '" + LINEA_ITEM + "'" );
+            compras.add( LINEA_ITEM );
+        }
+
+        editor.putStringSet( "compras", compras );
+        editor.apply();
+        Log.d( LogTag, "Lista de la compra guardada." );
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+
+        // Recuperar la lista de la compra
+        Log.d( LogTag, "Recuperando lista de la compra..." );
+
+        final SharedPreferences prefs = this.getPreferences( MODE_PRIVATE );
+        Set<String> compras = prefs.getStringSet( "compras",
+                                                 new HashSet<>() );
+
+        this.items.clear();
+        for(String item: compras) {
+            final String[] PARTES = item.trim().split( "," );
+            String supermercado = "";
+
+            if ( PARTES.length > 1 ) {
+                supermercado = PARTES[ 1 ];
+            }
+
+            Log.d( LogTag, "Recuperado: '" + item + "'" );
+            this.items.add( new Item( PARTES[ 0 ], supermercado ) );
+        }
+
+        this.creaLista();
+        Log.d( LogTag, "Lista de la compra recuperada." );
     }
 
     @Override
